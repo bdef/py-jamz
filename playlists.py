@@ -2,6 +2,7 @@ import filecmp
 import os
 import shutil
 import subprocess
+from settings import Settings
 
 
 class NotATrackError(Exception):
@@ -75,7 +76,10 @@ class Playlist:
             remaining -= 1
 
     def write_tmp_playlist(self):
-        tmp_playlist_path = os.path.join('tmp', self.fname)
+        tmp_playlist_dir = os.path.join(Settings.LOCAL_PLAYLISTS_DIR, 'tmp')
+        if not os.path.isdir(tmp_playlist_dir):
+            os.makedirs(tmp_playlist_dir)
+        tmp_playlist_path = os.path.join(tmp_playlist_dir, self.fname)
         print("Converting playlist {}...".format(tmp_playlist_path))
         with open(tmp_playlist_path, 'w') as f:
             f.write(self.file_header)
@@ -95,12 +99,16 @@ class Playlist:
         print('Checking {} for playlists...'.format(playlist_dir))
         playlists = []
         for f in os.listdir(playlist_dir):
-            fpath = os.path.join(playlist_dir, f)
-            fname, ext = f.split('.')
-            if ext == 'm3u':
-                playlists.append(M3UPlaylist(fpath))
-            else:
-                print("Extension {} not currently supported".format(ext))
+            try:
+                fpath = os.path.join(playlist_dir, f)
+                print("found fpath:  {}".format(fpath))
+                fname, ext = f.split('.')
+                if ext == 'm3u':
+                    playlists.append(M3UPlaylist(fpath))
+                else:
+                    print("Extension {} not currently supported".format(ext))
+            except Exception as e:
+                pass
         return playlists
 
     @classmethod
