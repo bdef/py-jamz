@@ -14,15 +14,17 @@ class MTPDevice:
         self.id = device_str[23:31]
         self.name = device_str[33:]
         self._set_mtp_device_root_path()
-        self.jamz_gvfs_target_dir = None
-        # for key in self.__dict__.keys():
-            # print('{}:    {}'.format(key, self.__dict__[key]))
+        # used to build the path for Playlists on the device
+        self.gvfs_target_dir = None
 
-    def _set_jamz_gvfs_target_dir(self):
-        self.jamz_gvfs_target_dir = 'mtp://[usb:{},{}]/{}'.format(self.bus, self.device_num, quote(self.device_music_dir))
-        print(self.jamz_gvfs_target_dir)
+    def _set_gvfs_target_dir(self):
+        self.gvfs_target_dir = 'mtp://[usb:{},{}]/{}'.format(
+            self.bus,
+            self.device_num,
+            quote(self.device_music_dir))
 
     def _set_mtp_device_root_path(self):
+        # the path to the connected device on the pc it is connected to
         self.mtp_device_root_path = None
         mtp_devices_path = '/run/user/1000/gvfs/'
         device_list = os.listdir(mtp_devices_path)
@@ -50,7 +52,6 @@ class MTPDevice:
             if device.name == self.name:
                 self.bus, self.device_num = device.bus, device.device_num
                 self._set_mtp_device_root_path()
-                self._set_jamz_gvfs_target_dir()
                 break
 
     def dirs(self):
@@ -64,13 +65,13 @@ class MTPDevice:
             prompt += "{}. {}/Music\n".format(i, dir)
         user_choice = int(input(prompt))
         self.device_music_dir = os.path.join(self.dirs()[user_choice], 'Music')
-        self.jamz_target_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
+        self.jamz_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
         self._set_mtp_device_root_path()
-        self._set_jamz_gvfs_target_dir()
+        self._set_gvfs_target_dir()
 
     @property
     def playlist_dir(self):
-        return os.path.join(self.jamz_target_dir, 'Playlists')
+        return os.path.join(self.gvfs_target_dir, 'Playlists')
 
     def __str__(self):
         return self.name
