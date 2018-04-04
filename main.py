@@ -26,8 +26,7 @@ device.choose_music_dir()
 playlists = Playlist.get_playlists(dir_path=PLAYLISTS_DIR)
 for pl in playlists:
     pl.cp_tracks(device.jamz_target_dir)
-    # pl.cp_playlist_gvfs(device.gvfs_path)
-    pl.cp_playlist(device.jamz_target_dir)
+    pl.cp_playlist_gvfs(device.jamz_gvfs_target_dir)
 
 print("DONEZO FUNZO")
 # TODO:
@@ -39,3 +38,5 @@ print("DONEZO FUNZO")
 
 # create device versin of playlist w/ relative paths
 # finally, move playlists to device Playlist dir
+
+# cp --parents "/storage/jamz/Neko Case/Fox Confessor Brings The Flood/02 Star Witness.mp3" "/run/user/1000/gvfs/mtp:host=%5Busb%3A001%2C010%5D/Samsung SD card/Music/Neko Case/Fox Confessor Brings The Flood"

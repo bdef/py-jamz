@@ -14,12 +14,13 @@ class MTPDevice:
         self.id = device_str[23:31]
         self.name = device_str[33:]
         self._set_mtp_device_root_path()
+        self.jamz_gvfs_target_dir = None
         # for key in self.__dict__.keys():
             # print('{}:    {}'.format(key, self.__dict__[key]))
 
-    # def _set_gvfs_path(self):
-    #     self.gvfs_path = 'mtp://[usb:{},{}]/{}'.format(self.bus, self.device_num, quote(self.device_music_dir))
-    #     print(self.gvfs_path)
+    def _set_jamz_gvfs_target_dir(self):
+        self.jamz_gvfs_target_dir = 'mtp://[usb:{},{}]/{}'.format(self.bus, self.device_num, quote(self.device_music_dir))
+        print(self.jamz_gvfs_target_dir)
 
     def _set_mtp_device_root_path(self):
         self.mtp_device_root_path = None
@@ -49,7 +50,7 @@ class MTPDevice:
             if device.name == self.name:
                 self.bus, self.device_num = device.bus, device.device_num
                 self._set_mtp_device_root_path()
-                # self._set_gvfs_path()
+                self._set_jamz_gvfs_target_dir()
                 break
 
     def dirs(self):
@@ -65,7 +66,7 @@ class MTPDevice:
         self.device_music_dir = os.path.join(self.dirs()[user_choice], 'Music')
         self.jamz_target_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
         self._set_mtp_device_root_path()
-        # self._set_gvfs_path()
+        self._set_jamz_gvfs_target_dir()
 
     @property
     def playlist_dir(self):

@@ -14,7 +14,22 @@ class Track:
         absolute_path = absolute_path.rstrip()
         self.absolute_path = absolute_path
         self.relative_path = self.absolute_path.split('/jamz/')[-1]
+        self.fname = os.path.split(self.relative_path)[1]
         # print("Found track {}".format(self.absolute_path))
+
+    @property
+    def relative_path_dir(self):
+        return os.path.split(self.relative_path)[0]
+
+    def cp_track(self, dest_path):
+        abs_track_dest_dir = os.path.join(dest_path, self.relative_path_dir)
+        if not os.path.isdir(abs_track_dest_dir):
+            os.makedirs(abs_track_dest_dir)
+        cmd = 'cp "{src}" "{dest}"'.format(
+            src=self.absolute_path,
+            dest=abs_track_dest_dir)
+        print("Copying {}".format(self.fname))
+        subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
 
 class Playlist:
@@ -37,11 +52,7 @@ class Playlist:
 
     def cp_tracks(self, dest_path):
         for track in self.tracks:
-            cmd = 'cp --parents "{src}" "{dest}"'.format(
-                src=track.absolute_path,
-                dest=os.path.join(dest_path, track.relative_path))
-            print("Copying {}".format(os.path.split(track.relative_path)[-1]))
-            # subprocess.check_call(cmd)
+            track.cp_track(dest_path)
 
     def write_tmp_playlist(self):
         tmp_playlist_path = os.path.join('tmp', self.fname)
@@ -53,31 +64,23 @@ class Playlist:
         self.tmp_playlist_path = tmp_playlist_path
         shutil.copystat(self.absolute_path, self.tmp_playlist_path)
 
-    # def write_playlist(self, dest_dir):
-    #     # write the str from relative_path_playlist to dest_dir
-    #     if not os.path.isdir(dest_dir):
-    #         os.mkdir(dest_dir)
-    #     dest_path = os.path.join(dest_dir, self.fname)
-    #     print("Writing playlist to {}".format(dest_path))
-    #     with open(dest_path, 'w') as f:
-    #         f.write(self.file_header)
-    #         f.write(self.relative_path_playlist())
-    #         f.close()        
-
-    # def cp_playlist_gvfs(self, gvfs_dest):
-    #     cmd = 'gvfs-copy "{}" "{}/Playlists"'.format(self.absolute_path, gvfs_dest)
-    #     print(cmd)
-    #     # gvfs-copy "/home/billy/Music/jamz/Playlists/bak/Girls Girl Girls.m3u" mtp://[usb:001,005]/Samsung%20SD%20card/Music/Playlists
-    #     #                                                                       mtp://[usb:001,005]/Samsung%20SD%20card/Music/Playlists
-    #     output = subprocess.check_output(cmd, universal_newlines=True)
-    #     print(output)
+    def cp_playlist_gvfs(self, gvfs_dest):
+        self.write_tmp_playlist()
+        cmd = 'gvfs-copy "{}" "{}/Playlists"'.format(self.tmp_playlist_path, gvfs_dest)
+        print("Copying playlist {}".format(self.fname))
+        # gvfs-copy "/home/billy/Music/jamz/Playlists/bak/Girls Girl Girls.m3u" mtp://[usb:001,005]/Samsung%20SD%20card/Music/Playlists
+        #                                                                       mtp://[usb:001,005]/Samsung%20SD%20card/Music/Playlists
+        # output = subprocess.check_outputz(cmd, universal_newlines=True)
+        subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
     def cp_playlist(self, dest_dir):
         if not os.path.isdir(dest_dir):
             os.mkdir(dest_dir)
         self.write_tmp_playlist()
         print('Copying playlist {} to {}'.format(self.fname, dest_dir))
-        shutil.copy(self.tmp_playlist_path, dest_dir)
+        # shutil.copy(self.tmp_playlist_path, dest_dir)
+        cmd = 'cp "{}" "{}/Playlists"'.format(self.tmp_playlist_path, dest_dir)
+        subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
 
     @classmethod
