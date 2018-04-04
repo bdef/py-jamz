@@ -14,9 +14,11 @@ class Track:
             raise NotATrackError('This is a comment, not a track!')
         absolute_path = absolute_path.rstrip()
         self.absolute_path = absolute_path
-        # we have to cast to upper case because Fat32 is case-insensitive
-        self.relative_path = self.absolute_path.split('/jamz/')[-1].upper()
-        self.fname = os.path.split(self.relative_path)[1]
+        # we have to cast to upper case because Fat32 is case-insensitive, while Linux isn't,
+        # and the SD card in my Android phone is Fat32.
+        relative_path = self.absolute_path.split('/jamz/')[-1]
+        relative_path, self.fname = os.path.split(relative_path)
+        self.relative_path = os.path.join(relative_path.upper(), self.fname)
 
     @property
     def relative_path_dir(self):
@@ -108,6 +110,7 @@ class Playlist:
             print("Found playlist {} with {} songs.".format(pl.src_abs_path, pl.num_tracks))
             pl.cp_tracks(device_jamz_dir)
             pl.cp_playlist(device_playlist_dir)
+            print('Playlist {} sucessfully imported!\n'.format(pl.fname))
 
 
 class M3UPlaylist(Playlist):
