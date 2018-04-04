@@ -1,3 +1,4 @@
+import filecmp
 import os
 import shutil
 import subprocess
@@ -13,7 +14,8 @@ class Track:
             raise NotATrackError('This is a comment, not a track!')
         absolute_path = absolute_path.rstrip()
         self.absolute_path = absolute_path
-        self.relative_path = self.absolute_path.split('/jamz/')[-1]
+        # we have to cast to upper case because Fat32 is case-insensitive
+        self.relative_path = self.absolute_path.split('/jamz/')[-1].upper()
         self.fname = os.path.split(self.relative_path)[1]
 
     @property
@@ -22,13 +24,23 @@ class Track:
 
     def cp_track(self, dest_path):
         abs_track_dest_dir = os.path.join(dest_path, self.relative_path_dir)
+        if self.is_same(abs_track_dest_dir):
+            print("No changes to {}. Skipping...".format(self.fname))
+            return
         if not os.path.isdir(abs_track_dest_dir):
-            os.makedirs(abs_track_dest_dir)
+            print('Making dirs: {}'.format(abs_track_dest_dir))
+            os.makedirs(abs_track_dest_dir, exist_ok=True)
         cmd = 'cp "{src}" "{dest}"'.format(
             src=self.absolute_path,
             dest=abs_track_dest_dir)
         print("Copying {}".format(self.fname))
         subprocess.check_call(cmd, universal_newlines=True, shell=True)
+
+    def is_same(self, track_dest_dir):
+        track_dest_path = os.path.join(track_dest_dir, self.fname)
+        if os.path.isfile(track_dest_path):
+            return filecmp.cmp(self.absolute_path, track_dest_path, shallow=True)
+        return False
 
 
 class Playlist:
@@ -49,13 +61,21 @@ class Playlist:
                 except NotATrackError:
                     pass
 
+    @property
+    def num_tracks(self):
+        return len(self.tracks)
+
     def cp_tracks(self, dest_path):
+        print('Copying tracks...')
+        remaining = self.num_tracks
         for track in self.tracks:
+            print("{} tracks left...".format(remaining))
             track.cp_track(dest_path)
+            remaining -= 1
 
     def write_tmp_playlist(self):
         tmp_playlist_path = os.path.join('tmp', self.fname)
-        print("Writing temporary playlist to {}".format(tmp_playlist_path))
+        print("Converting playlist {}...".format(tmp_playlist_path))
         with open(tmp_playlist_path, 'w') as f:
             f.write(self.file_header)
             f.write(self.relative_path_playlist())
@@ -66,7 +86,7 @@ class Playlist:
     def cp_playlist(self, gvfs_dest):
         self.write_tmp_playlist()
         cmd = 'gvfs-copy "{}" "{}"'.format(self.tmp_playlist_path, gvfs_dest)
-        print("Copying playlist {}".format(self.fname))
+        print("Copying converted playlist to {}".format(gvfs_dest))
         subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
     @classmethod
@@ -81,6 +101,14 @@ class Playlist:
             else:
                 print("Extension {} not currently supported".format(ext))
         return playlists
+
+    @classmethod
+    def jamz(cls, local_playlists_dir, device_jamz_dir, device_playlist_dir):
+        playlists = cls.get_playlists(playlist_dir=local_playlists_dir)
+        for pl in playlists:
+            print("Found playlist {} with {} songs.".format(pl.src_abs_path, pl.num_tracks))
+            pl.cp_tracks(device_jamz_dir)
+            pl.cp_playlist(device_playlist_dir)
 
 
 class M3UPlaylist(Playlist):

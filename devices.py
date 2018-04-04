@@ -12,10 +12,11 @@ class MTPDevice:
         self.bus = device_str[4:7]
         self.device_num = device_str[15:18]
         self.id = device_str[23:31]
-        self.name = device_str[33:]
+        self.name = device_str[33:].rstrip()
         self._set_mtp_device_root_path()
         # used to build the path for Playlists on the device
         self.gvfs_target_dir = None
+        self.device_music_dir = None
 
     def _set_gvfs_target_dir(self):
         self.gvfs_target_dir = 'mtp://[usb:{},{}]/{}'.format(
@@ -34,7 +35,13 @@ class MTPDevice:
             if check_str == bus_device_num:
                 self.mtp_device_root_path = mtp_devices_path + device
                 break
-        
+    
+    def set_device_music_dir(self, device_music_dir):
+        self.device_music_dir = device_music_dir
+        self.jamz_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
+        self._set_mtp_device_root_path()
+        self._set_gvfs_target_dir()
+
     def is_mounted(self):
         if self.dirs():
             return True
@@ -87,3 +94,11 @@ class MTPDevice:
                 # it's connected, so add it to the list!
                 devices.append(device)
         return devices
+
+    @classmethod
+    def get_mtp_device(cls, device_name):
+        devices = cls.get_mtp_devices()
+        for d in devices:
+            if device_name == d.name:
+                return d
+        raise DeviceNotConnectedError("Couldn't find device {}".format(device_name))
