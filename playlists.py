@@ -28,7 +28,6 @@ class Track:
             print("No changes to {}. Skipping...".format(self.fname))
             return
         if not os.path.isdir(abs_track_dest_dir):
-            print('Making dirs: {}'.format(abs_track_dest_dir))
             os.makedirs(abs_track_dest_dir, exist_ok=True)
         cmd = 'cp "{src}" "{dest}"'.format(
             src=self.absolute_path,
