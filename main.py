@@ -5,9 +5,6 @@ from settings import Settings
 
 print("Starting PY JAMZ!")
 
-# TODO:
-# export playlists from Rhythmbox automatically?
-
 try:
     device = MTPDevice.get_mtp_device(device_name=Settings.MTP_DEVICE_NAME)
     print("Using device `{}` based on your settings.".format(device.name))
