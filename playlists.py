@@ -2,7 +2,9 @@ import filecmp
 import os
 import shutil
 import subprocess
+
 from settings import Settings
+from rbxml import RBPlaylistExporter
 
 
 class NotATrackError(Exception):
@@ -114,6 +116,8 @@ class Playlist:
 
     @classmethod
     def jamz(cls, local_playlists_dir, device_jamz_dir, device_playlist_dir):
+        exporter = RBPlaylistExporter(Settings.RB_PLAYLISTS_XML, local_playlists_dir)
+        exporter.export_m3us()
         playlists = cls.get_playlists(playlist_dir=local_playlists_dir)
         for pl in playlists:
             print("Found playlist {} with {} songs.".format(pl.src_abs_path, pl.num_tracks))
