@@ -2,6 +2,8 @@ import os
 from urllib.parse import unquote
 import xml.etree.ElementTree as etree
 
+from tracks import Track
+
 
 class RBPlaylistBuilder:
     file_header = '#EXTM3U\n'
@@ -23,15 +25,15 @@ class RBPlaylistBuilder:
         print("Scanning tracks....")
         self.tracks = []
         for child in self.xml_node:
-            track = child.text.replace(self.location_leader, '')
-            self.tracks.append(unquote(track))
+            abs_path = unquote(child.text.replace(self.location_leader, ''))
+            self.tracks.append(Track(abs_path))
 
     def write_m3u(self, dest_dir):
-        print("Converting to m3u...")
+        print("Converting {} to m3u...".format(self.fname))
         fpath = os.path.join(dest_dir, self.fname)
         with open(fpath, 'w') as m3u_f:
             m3u_f.write(self.file_header)
-            m3u_f.write('\n'.join(self.tracks))
+            m3u_f.write('\n'.join([track.absolute_path for track in self.tracks]))
 
 
 class RBPlaylistExporter:
