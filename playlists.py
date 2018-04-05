@@ -96,6 +96,6 @@ class M3UPlaylist(Playlist):
     def relative_path_playlist(self):
         playlist = ''
         for track in self.tracks:
-            # print('.')
+            playlist += '{}\n'.format(track.extinf)
             playlist += '{}\n'.format(os.path.join('..', track.relative_path))
         return playlist

@@ -6,6 +6,8 @@ import subprocess
 class NotATrackError(Exception):
     pass
 
+import eyed3
+
 
 class Track:
     def __init__(self, absolute_path):
@@ -18,15 +20,24 @@ class Track:
         relative_path = self.absolute_path.split('/jamz/')[-1]
         relative_path, self.fname = os.path.split(relative_path)
         self.relative_path = os.path.join(relative_path.upper(), self.fname)
-        self._set_name()
+        self._set_tag_info()
 
-    def _set_name(self):
-        self.name = ''
-        # use ID tag to set name
+    def _set_tag_info(self):
+        self.artist = None
+        self.title = None
+        audiofile = eyed3.load(self.absolute_path)
+        try:
+            self.artist = audiofile.tag.artist
+            self.title = audiofile.tag.title
+        except AttributeError:
+            # the tag info failed!
+            pass
 
     @property
     def extinf(self):
-        return '#EXTINF:,{}'.format(self.name)    
+        if self.title is not None:
+            return '#EXTINF:,{} - {}'.format(self.artist, self.title)    
+        return '#EXTINF:,{}'.format(self.fname)
 
     @property
     def relative_path_dir(self):

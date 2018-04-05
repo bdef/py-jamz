@@ -14,6 +14,12 @@ try:
 except:
     print('Checking for USB connected devices...')
     devices = MTPDevice.get_mtp_devices()
+
+    while len(devices) == 0:
+        prompt = "Please connect a USB device and hit ENTER...\n"
+        input(prompt)
+        devices = MTPDevice.get_mtp_devices()
+
     prompt = "Please enter the number of the MTP device to sync:\n"
     for i, device in enumerate(devices):
         prompt += "{}.  {}\n".format(i, device)
