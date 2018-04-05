@@ -2,11 +2,11 @@ import filecmp
 import os
 import subprocess
 
+import eyed3
+
 
 class NotATrackError(Exception):
     pass
-
-import eyed3
 
 
 class Track:
