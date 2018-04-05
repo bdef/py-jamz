@@ -8,10 +8,10 @@ print("Starting PY JAMZ!")
 # TODO:
 # export playlists from Rhythmbox automatically?
 
-if Settings.MTP_DEVICE_NAME:
+try:
     device = MTPDevice.get_mtp_device(device_name=Settings.MTP_DEVICE_NAME)
     print("Using device `{}` based on your settings.".format(device.name))
-else:
+except:
     print('Checking for USB connected devices...')
     devices = MTPDevice.get_mtp_devices()
     prompt = "Please enter the number of the MTP device to sync:\n"

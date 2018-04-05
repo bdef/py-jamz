@@ -101,13 +101,14 @@ class Playlist:
         for f in os.listdir(playlist_dir):
             try:
                 fpath = os.path.join(playlist_dir, f)
-                print("found fpath:  {}".format(fpath))
                 fname, ext = f.split('.')
                 if ext == 'm3u':
                     playlists.append(M3UPlaylist(fpath))
                 else:
                     print("Extension {} not currently supported".format(ext))
-            except Exception as e:
+            except ValueError as e:
+                # if .split() failed, it's because the path split doens't have a . in
+                # it, so it's probably a directory. so just skip it.
                 pass
         return playlists
 
