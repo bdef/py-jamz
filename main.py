@@ -32,6 +32,10 @@ if Settings.MTP_DEVICE_MUSIC_DIR:
 else:
     device.choose_music_dir()
 
-Playlist.jamz(Settings.LOCAL_PLAYLISTS_DIR, device.jamz_dir, device.playlist_dir)
+
+Playlist.jamz(
+    Settings.LOCAL_PLAYLISTS_DIR,
+    device.jamz_dir,device.playlist_dir,
+    export_rb=Settings.RB_AUTOEXPORT)
 
 print("DONEZO FUNZO")
