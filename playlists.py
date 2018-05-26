@@ -52,7 +52,7 @@ class Playlist:
 
     def cp_playlist(self, gvfs_dest):
         self.write_tmp_playlist()
-        cmd = 'gvfs-copy "{}" "{}"'.format(self.tmp_playlist_path, gvfs_dest)
+        cmd = 'gio copy "{}" "{}"'.format(self.tmp_playlist_path, gvfs_dest)
         print("Copying converted playlist to {}".format(gvfs_dest))
         subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
