@@ -27,6 +27,8 @@ class MTPDevice:
     def _set_mtp_device_root_path(self):
         # the path to the connected device on the pc it is connected to
         self.mtp_device_root_path = None
+        # !!!!! NOTE: device will only be listed at this dir if you have gvfs-fuse installed.
+        # read comments at https://askubuntu.com/a/342549
         mtp_devices_path = '/run/user/1000/gvfs/'
         device_list = os.listdir(mtp_devices_path)
         check_str = '{},{}'.format(self.bus, self.device_num)
