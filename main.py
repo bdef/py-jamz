@@ -8,7 +8,7 @@ print("Starting PY JAMZ!")
 try:
     device = MTPDevice.get_mtp_device(device_name=Settings.MTP_DEVICE_NAME)
     print("Using device `{}` based on your settings.".format(device.name))
-except:
+except Exception as e:
     print('Checking for USB connected devices...')
     devices = MTPDevice.get_mtp_devices()
 
@@ -32,10 +32,15 @@ if Settings.MTP_DEVICE_MUSIC_DIR:
 else:
     device.choose_music_dir()
 
+prompt = "Export playlists from Rhthymbox? y/n\n"
+export = input(prompt)
+export = True if 'y' in export else False
+
 
 Playlist.jamz(
     Settings.LOCAL_PLAYLISTS_DIR,
-    device.jamz_dir,device.playlist_dir,
-    export_rb=Settings.RB_AUTOEXPORT)
+    device.jamz_dir,
+    device.playlist_dir,
+    export_rb=export)
 
 print("DONEZO FUNZO")

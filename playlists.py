@@ -50,10 +50,15 @@ class Playlist:
         self.tmp_playlist_path = tmp_playlist_path
         shutil.copystat(self.src_abs_path, self.tmp_playlist_path)
 
-    def cp_playlist(self, gvfs_dest):
+    def cp_playlist(self, dest):
         self.write_tmp_playlist()
-        cmd = 'gio copy "{}" "{}"'.format(self.tmp_playlist_path, gvfs_dest)
-        print("Copying converted playlist to {}".format(gvfs_dest))
+        cmd = 'cp "{src}" "{dest}"'.format(
+            src=self.tmp_playlist_path,
+            dest=dest)
+        # print("Copying {}".format(self.fname))
+        print(cmd)
+        subprocess.check_call(cmd, universal_newlines=True, shell=True)
+        print("Copying converted playlist to {}".format(dest))
         subprocess.check_call(cmd, universal_newlines=True, shell=True)
 
     @classmethod
@@ -77,8 +82,13 @@ class Playlist:
     @classmethod
     def jamz(cls, local_playlists_dir, device_jamz_dir, device_playlist_dir, export_rb=True):
         if export_rb:
+            print("Exporting playlists from {}".format(Settings.RB_PLAYLISTS_XML))
             exporter = RBPlaylistExporter(Settings.RB_PLAYLISTS_XML, local_playlists_dir)
             exporter.export_m3us()
+        else:
+            print("Skipping Rhythmbox playlist export.")
+        prompt = "Delete any playlists you don't want synced to your phone from {} then hit any key to continue...\n".format(local_playlists_dir)
+        input(prompt)
         playlists = cls.get_playlists(playlist_dir=local_playlists_dir)
         for pl in playlists:
             print("Found playlist {} with {} songs.".format(pl.src_abs_path, pl.num_tracks))

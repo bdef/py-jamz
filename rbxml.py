@@ -34,7 +34,7 @@ class RBPlaylistBuilder:
         with open(fpath, 'w') as m3u_f:
             m3u_f.write(self.file_header)
             m3u_f.write('\n'.join([track.absolute_path for track in self.tracks]))
-
+        print("Wrote {}".format(fpath))
 
 class RBPlaylistExporter:
 

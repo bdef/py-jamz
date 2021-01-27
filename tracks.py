@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import eyed3
+from settings import Settings
 
 
 class NotATrackError(Exception):
@@ -54,10 +55,17 @@ class Track:
             src=self.absolute_path,
             dest=abs_track_dest_dir)
         print("Copying {}".format(self.fname))
-        subprocess.check_call(cmd, universal_newlines=True, shell=True)
+        try:
+            subprocess.check_call(cmd, universal_newlines=True, shell=True)
+        except Exception as ex:
+            print("cmd failed:")
+            print(cmd)
+            raise ex
 
     def is_same(self, track_dest_dir):
         track_dest_path = os.path.join(track_dest_dir, self.fname)
         if os.path.isfile(track_dest_path):
+            if Settings.QUICK_FILE_CHECK:
+                return True
             return filecmp.cmp(self.absolute_path, track_dest_path, shallow=True)
         return False

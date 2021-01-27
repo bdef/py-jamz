@@ -15,34 +15,16 @@ class MTPDevice:
         self.name = device_str[33:].rstrip()
         self._set_mtp_device_root_path()
         # used to build the path for Playlists on the device
-        self.gvfs_target_dir = None
         self.device_music_dir = None
-
-    def _set_gvfs_target_dir(self):
-        self.gvfs_target_dir = 'mtp://[usb:{},{}]/{}'.format(
-            self.bus,
-            self.device_num,
-            quote(self.device_music_dir))
 
     def _set_mtp_device_root_path(self):
         # the path to the connected device on the pc it is connected to
-        self.mtp_device_root_path = None
-        # !!!!! NOTE: device will only be listed at this dir if you have gvfs-fuse installed.
-        # read comments at https://askubuntu.com/a/342549
-        mtp_devices_path = '/run/user/1000/gvfs/'
-        device_list = os.listdir(mtp_devices_path)
-        check_str = '{},{}'.format(self.bus, self.device_num)
-        for device in device_list:
-            bus_device_num = unquote(device)[14:21]
-            if check_str == bus_device_num:
-                self.mtp_device_root_path = mtp_devices_path + device
-                break
-    
+        # TODO: probably make this dynamic?
+        self.mtp_device_root_path = '/run/user/1000/gvfs/mtp:host=Google_Pixel_4a_08041JEC216935'
+
     def set_device_music_dir(self, device_music_dir):
         self.device_music_dir = device_music_dir
         self.jamz_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
-        self._set_mtp_device_root_path()
-        self._set_gvfs_target_dir()
 
     def is_mounted(self):
         if self.dirs():
@@ -76,11 +58,10 @@ class MTPDevice:
         self.device_music_dir = os.path.join(self.dirs()[user_choice], 'Music')
         self.jamz_dir = os.path.join(self.mtp_device_root_path, self.device_music_dir)
         self._set_mtp_device_root_path()
-        self._set_gvfs_target_dir()
 
     @property
     def playlist_dir(self):
-        return os.path.join(self.gvfs_target_dir, 'Playlists')
+        return os.path.join(self.jamz_dir, 'Playlists')
 
     def __str__(self):
         return self.name
@@ -92,9 +73,10 @@ class MTPDevice:
         devices = []
         for line in output.split('\n')[:-1]:
             device = MTPDevice(line)
-            if device.mtp_device_root_path:
-                # it's connected, so add it to the list!
-                devices.append(device)
+            # if device.mtp_device_root_path:
+            #     # it's connected, so add it to the list!
+            #     devices.append(device)
+            devices.append(device)
         return devices
 
     @classmethod
