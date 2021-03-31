@@ -2,25 +2,25 @@ import os
 import subprocess
 from urllib.parse import unquote, quote
 
+
 class DeviceNotConnectedError(Exception):
     pass
 
 
 class MTPDevice:
+    MTP_ROOT_PATH_DIR = '/run/user/1000/gvfs/'
 
     def __init__(self, device_str):
         self.bus = device_str[4:7]
         self.device_num = device_str[15:18]
         self.id = device_str[23:31]
         self.name = device_str[33:].rstrip()
-        self._set_mtp_device_root_path()
         # used to build the path for Playlists on the device
         self.device_music_dir = None
 
-    def _set_mtp_device_root_path(self):
+    def _set_mtp_device_root_path(self, path):
         # the path to the connected device on the pc it is connected to
-        # TODO: probably make this dynamic?
-        self.mtp_device_root_path = '/run/user/1000/gvfs/mtp:host=Google_Pixel_4a_08041JEC216935'
+        self.mtp_device_root_path = '{}{}'.format(self.MTP_ROOT_PATH_DIR, path)
 
     def set_device_music_dir(self, device_music_dir):
         self.device_music_dir = device_music_dir
@@ -86,3 +86,7 @@ class MTPDevice:
             if device_name == d.name:
                 return d
         raise DeviceNotConnectedError("Couldn't find device {}".format(device_name))
+
+    @classmethod
+    def list_mtp_device_root_paths(cls):
+        return os.listdir(cls.MTP_ROOT_PATH_DIR)

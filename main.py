@@ -22,9 +22,19 @@ except Exception as e:
         prompt += "{}.  {}\n".format(i, device)
     device = devices[int(input(prompt))]
     print("You chose {}".format(device))
-
-if not device.is_mounted():
+ 
+try:
+    device.is_mounted()
+except FileNotFoundError:
     device.prompt_mount()
+
+prompt = "Please enter the number of the MTP device root path:\n"
+mtp_root_paths = device.list_mtp_device_root_paths()
+for i, path in enumerate(mtp_root_paths):
+    prompt += "{}.  {}\n".format(i, path)
+mtp_root_path = mtp_root_paths[int(input(prompt))]
+print("You chose {}".format(mtp_root_path))
+device._set_mtp_device_root_path(mtp_root_path)
 
 if Settings.MTP_DEVICE_MUSIC_DIR:
     device.set_device_music_dir(Settings.MTP_DEVICE_MUSIC_DIR)

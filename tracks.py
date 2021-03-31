@@ -11,6 +11,7 @@ class NotATrackError(Exception):
 
 
 class Track:
+    INVALID_CHARS = '<>"|?*'
     def __init__(self, absolute_path):
         if absolute_path.startswith('#'):
             raise NotATrackError('This is a comment, not a track!')
@@ -46,6 +47,8 @@ class Track:
 
     def cp_track(self, dest_path):
         abs_track_dest_dir = os.path.join(dest_path, self.relative_path_dir)
+        for char in self.INVALID_CHARS:
+            abs_track_dest_dir = abs_track_dest_dir.replace(char, '')
         if self.is_same(abs_track_dest_dir):
             print("No changes to {}. Skipping...".format(self.fname))
             return
